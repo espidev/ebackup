@@ -25,15 +25,9 @@ backup-path: 'plugins/eBackup/backups'
 max-backups: 20
 
 # FTP/SFTP settings and configuration.
-# Different modes (when to use FTP/SFTP):
-# - NEVER (disable)
-# - FALLBACK (when an error occurs)
-# - LIMIT (move files when maxbackups is reached)
-# - FIRST (use ftp unless an error occurs)
-# - ALWAYS (only save to ftp, never use local)
-# - BOTH (save to both ftp and local)
+# Backups saved here will not be auto-deleted.
 ftp:
-    mode: NEVER
+    enable: false
     type: sftp # ftp for ftp, sftp for ftp over ssh
     host: 'localhost'
     port: 22
@@ -50,3 +44,4 @@ backup:
         - 'plugins/eBackup/backups'
         - 'plugins/dynmap'
         - 'logs'
+        - 'cache'
