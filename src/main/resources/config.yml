@@ -1,0 +1,52 @@
+crontask: '0 0 4 * * *' # This would make it every day at 4 AM
+
+# CronTask format:
+# * * * * * *
+# | | | | | |
+# | | | | | +–––– Day of the Week   (1-7)
+# | | | | +–––––– Month             (1-12)
+# | | | +–––––––– Day of the Month  (1-31)
+# | | +–––––––––– Hour              (0-23)
+# | +–––––––––––– Minute            (0-59)
+# +–––––––––––––– Second            (0-59)
+
+# A few more examples...
+# crontask: '0 0 * * * *' This would make it every hour
+# crontask: '0 0 4 * * 7' This would make it every sunday at 4 AM
+# crontask: '0 0 4 1 * *' This would make it every first of the month at 4 AM
+
+backup-format: 'eBackup {DATE}'
+
+# The folder where to store the backups locally.
+backup-path: 'plugins/eBackup/backups'
+
+# The maximum backups stored. Will delete older backups when reached. (≤ 0 to disable)
+# Note: this will only work with local backups (fallbacks included).
+max-backups: 20
+
+# FTP/SFTP settings and configuration.
+# Different modes (when to use FTP/SFTP):
+# - NEVER (disable)
+# - FALLBACK (when an error occurs)
+# - LIMIT (move files when maxbackups is reached)
+# - FIRST (use ftp unless an error occurs)
+# - ALWAYS (only save to ftp, never use local)
+# - BOTH (save to both ftp and local)
+ftp:
+    mode: NEVER
+    type: sftp # ftp for ftp, sftp for ftp over ssh
+    host: 'localhost'
+    port: 22
+    user: 'username'
+    pass: 'password'
+    path: '~/PerfectBackups/'
+
+# What you want in the backup.
+# By default, everything will be backupped, you can remove folders in the ignore section
+backup:
+    pluginjars: true # The .jar files for the plugins
+    pluginconfs: true # The data folder of each plugin
+    ignore: # Files to ignore and NOT backup
+        - 'plugins/eBackup/backups'
+        - 'plugins/dynmap'
+        - 'logs'
