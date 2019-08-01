@@ -1,5 +1,6 @@
 package dev.espi.ebackup;
 
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -49,6 +50,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     @Override
     public void onEnable() {
         getLogger().info("Initializing eBackup...");
+
+        Metrics metrics = new Metrics(this);
+
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
 
