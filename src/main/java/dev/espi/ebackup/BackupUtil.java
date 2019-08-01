@@ -92,6 +92,7 @@ public class BackupUtil {
 
                 w.save();
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
+                eBackup.getPlugin().getLogger().info("Backing up world " + world.getName() + "...");
                 zipFile(world, world.getName(), zipOut);
                 w.setAutoSave(true);
 
@@ -101,6 +102,7 @@ public class BackupUtil {
             }
 
             // dfs all other files
+            eBackup.getPlugin().getLogger().info("Backing up other files...");
             zipFile(new File(Paths.get(".").toAbsolutePath().normalize().toString()), "", zipOut);
             zipOut.close();
             fos.close();

@@ -3,12 +3,12 @@ crontask: '0 0 4 * * *' # This would make it every day at 4 AM
 # CronTask format:
 # * * * * * *
 # | | | | | |
-# | | | | | +–––– Day of the Week   (1-7)
-# | | | | +–––––– Month             (1-12)
-# | | | +–––––––– Day of the Month  (1-31)
-# | | +–––––––––– Hour              (0-23)
-# | +–––––––––––– Minute            (0-59)
-# +–––––––––––––– Second            (0-59)
+# | | | | | +---- Day of the Week   (1-7)
+# | | | | +------ Month             (1-12)
+# | | | +-------- Day of the Month  (1-31)
+# | | +---------- Hour              (0-23)
+# | +------------ Minute            (0-59)
+# +-------------- Second            (0-59)
 
 # A few more examples...
 # crontask: '0 0 * * * *' This would make it every hour
