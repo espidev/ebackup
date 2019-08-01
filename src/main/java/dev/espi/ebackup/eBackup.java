@@ -84,6 +84,14 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
 
         if (!backupPath.exists()) backupPath.mkdir(); // make sure backup location exists
 
+        // start cron task
+        Cron.checkCron();
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            if (Cron.run()) {
+                BackupUtil.doBackup();
+            }
+        }, 20, 20);
+
         getLogger().info("Plugin initialized!");
     }
 

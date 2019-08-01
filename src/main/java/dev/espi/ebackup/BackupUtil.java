@@ -1,10 +1,6 @@
 package dev.espi.ebackup;
 
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.sftp.SFTPClient;
-import net.schmizz.sshj.transport.TransportException;
-import net.schmizz.sshj.userauth.UserAuthException;
-import net.schmizz.sshj.xfer.FileSystemFile;
+import com.jcraft.jsch.*;
 import org.apache.commons.net.ftp.FTPClient;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -134,20 +130,18 @@ public class BackupUtil {
         eBackup.getPlugin().getLogger().info("Backup complete!");
     }
 
-    private static void uploadSFTP(File f) throws IOException {
-        SSHClient ssh = new SSHClient();
-        ssh.loadKnownHosts();
-        ssh.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
-        try {
-            ssh.authPassword(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
-            try (SFTPClient sftp = ssh.newSFTPClient()) {
-                sftp.put(new FileSystemFile(f.getAbsolutePath()), eBackup.getPlugin().ftpPath);
-            }
-        } catch (UserAuthException | TransportException e) {
-            e.printStackTrace();
-        } finally {
-            ssh.disconnect();
-        }
+    private static void uploadSFTP(File f) throws JSchException, SftpException {
+        JSch jsch = new JSch();
+        Session session = jsch.getSession(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
+        session.setPassword(eBackup.getPlugin().ftpPass);
+        session.setConfig("StrictHostKeyChecking", "no");
+        session.connect();
+        Channel channel = session.openChannel("sftp");
+        channel.connect();
+        ChannelSftp sftpChannel = (ChannelSftp) channel;
+        sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath + "/" + f.getName());
+        sftpChannel.exit();
+        session.disconnect();
     }
 
     private static void uploadFTP(File f) {

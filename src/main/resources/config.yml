@@ -33,7 +33,7 @@ ftp:
     port: 22
     user: 'username'
     pass: 'password'
-    path: '~/PerfectBackups/'
+    path: '~/backups/'
 
 # What you want in the backup.
 # By default, everything will be backupped, you can remove folders in the ignore section
