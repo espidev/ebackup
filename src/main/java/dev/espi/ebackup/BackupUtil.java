@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -90,7 +92,14 @@ public class BackupUtil {
                 }
                 if (skip) continue;
 
-                w.save();
+                AtomicBoolean saved = new AtomicBoolean(false);
+                Bukkit.getScheduler().runTask(eBackup.getPlugin(), () -> {
+                    w.save();
+                    saved.set(true);
+                });
+
+                while (!saved.get()) Thread.sleep(500);
+
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
                 eBackup.getPlugin().getLogger().info("Backing up world " + world.getName() + "...");
                 zipFile(world, world.getName(), zipOut);
