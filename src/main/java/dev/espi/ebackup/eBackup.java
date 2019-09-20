@@ -90,7 +90,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         Cron.checkCron();
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             if (Cron.run()) {
-                BackupUtil.doBackup();
+                BackupUtil.doBackup(true);
             }
         }, 20, 20);
 
@@ -113,13 +113,21 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
             case "help":
                 sender.sendMessage(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + "=====" + ChatColor.RESET + ChatColor.DARK_AQUA + " eBackup v" + getPlugin().getDescription().getVersion() + " Help " + ChatColor.RESET + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "=====");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup backup - Starts a backup of the server.");
+                sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup backuplocal - Starts a backup of the server, but does not upload to FTP/SFTP.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup list - Lists the backups in the folder.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup stats - Shows disk space.");
                 break;
             case "backup":
                 sender.sendMessage("Starting backup...");
                 Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-                    BackupUtil.doBackup();
+                    BackupUtil.doBackup(true);
+                    sender.sendMessage("Finished!");
+                });
+                break;
+            case "backuplocal":
+                sender.sendMessage("Starting backup...");
+                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                    BackupUtil.doBackup(false);
                     sender.sendMessage("Finished!");
                 });
                 break;

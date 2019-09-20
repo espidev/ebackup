@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -59,7 +58,7 @@ public class BackupUtil {
 
     // actually do the backup
     // run async plz
-    public static void doBackup() {
+    public static void doBackup(boolean uploadToServer) {
         List<File> tempIgnore = new ArrayList<>();
         eBackup.getPlugin().getLogger().info("Starting backup...");
         try {
@@ -117,11 +116,11 @@ public class BackupUtil {
             fos.close();
 
             // upload to ftp/sftp
-            if (eBackup.getPlugin().ftpEnable) {
+            if (uploadToServer && eBackup.getPlugin().ftpEnable) {
                 if (eBackup.getPlugin().ftpType.equals("sftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
                     uploadSFTP(new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip"));
-                } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
+                } else if (uploadToServer && eBackup.getPlugin().ftpType.equals("ftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
                     uploadFTP(new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip"));
                 }
