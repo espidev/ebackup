@@ -159,7 +159,10 @@ public class BackupUtil {
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
-            ftpClient.storeFile(f.getAbsolutePath(), fio);
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.setUseEPSVwithIPv4(true);
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            ftpClient.storeFile(f.getName(), fio);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
