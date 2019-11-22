@@ -161,6 +161,7 @@ public class BackupUtil {
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setUseEPSVwithIPv4(true);
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.storeFile(f.getName(), fio);
         } catch (Exception e) {
             e.printStackTrace();
