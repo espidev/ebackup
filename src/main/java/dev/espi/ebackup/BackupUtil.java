@@ -1,6 +1,7 @@
 package dev.espi.ebackup;
 
 import com.jcraft.jsch.*;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
