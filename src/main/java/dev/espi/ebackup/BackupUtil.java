@@ -60,13 +60,6 @@ public class BackupUtil {
     // actually do the backup
     // run async plz
     public static void doBackup(boolean uploadToServer) {
-
-        // DEBUG !!!!!!!!!!!
-        // TODO
-        for (File f : eBackup.getPlugin().ignoredFiles) {
-            Bukkit.getLogger().info("[DEBUG] " + f.getAbsolutePath());
-        }
-
         List<File> tempIgnore = new ArrayList<>();
         eBackup.getPlugin().getLogger().info("Starting backup...");
         try {
@@ -89,8 +82,6 @@ public class BackupUtil {
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
                 File world = new File(w.getName());
-
-                Bukkit.getLogger().info("[DEBUG] " + world); // TODO
 
                 // check if world is in ignored list
                 boolean skip = false;
@@ -192,14 +183,18 @@ public class BackupUtil {
             if (f.getAbsolutePath().equals(fileToZip.getAbsolutePath())) return;
         }
 
+        // fix windows archivers not being able to see files because they don't support / (root) for zip files
+        if (fileName.startsWith("/")) {
+            fileName = fileName.substring(1);
+        }
+
         if (fileToZip.isDirectory()) { // recursively search
             if (fileName.endsWith("/")) {
                 zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
             } else {
                 zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
             }
+            zipOut.closeEntry();
             File[] children = fileToZip.listFiles();
             for (File childFile : children) {
                 zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
