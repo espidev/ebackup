@@ -60,6 +60,13 @@ public class BackupUtil {
     // actually do the backup
     // run async plz
     public static void doBackup(boolean uploadToServer) {
+
+        // DEBUG !!!!!!!!!!!
+        // TODO
+        for (File f : eBackup.getPlugin().ignoredFiles) {
+            Bukkit.getLogger().info("[DEBUG] " + f.getAbsolutePath());
+        }
+
         List<File> tempIgnore = new ArrayList<>();
         eBackup.getPlugin().getLogger().info("Starting backup...");
         try {
@@ -82,6 +89,9 @@ public class BackupUtil {
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
                 File world = new File(w.getName());
+
+                Bukkit.getLogger().info("[DEBUG] " + world); // TODO
+
                 // check if world is in ignored list
                 boolean skip = false;
                 for (File f : eBackup.getPlugin().ignoredFiles) {
