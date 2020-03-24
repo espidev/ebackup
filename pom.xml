@@ -6,7 +6,7 @@
 
     <groupId>net.espi.ebackup</groupId>
     <artifactId>ebackup</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <licenses>
         <license>

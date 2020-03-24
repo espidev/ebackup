@@ -18,7 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /*
-   Copyright 2019 EstiNet
+   Copyright 2020 EstiNet
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -144,10 +144,24 @@ public class BackupUtil {
 
     private static void uploadSFTP(File f) throws JSchException, SftpException {
         JSch jsch = new JSch();
+
+        // ssh key auth if enabled
+        if (eBackup.getPlugin().useSftpKeyAuth) {
+            if (eBackup.getPlugin().sftpPrivateKeyPassword.equals("")) {
+                jsch.addIdentity(eBackup.getPlugin().sftpPrivateKeyPath);
+            } else {
+                jsch.addIdentity(eBackup.getPlugin().sftpPrivateKeyPath, eBackup.getPlugin().sftpPrivateKeyPassword);
+            }
+        }
+
         Session session = jsch.getSession(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
-        session.setPassword(eBackup.getPlugin().ftpPass);
+        // password auth if using password
+        if (!eBackup.getPlugin().useSftpKeyAuth) {
+            session.setPassword(eBackup.getPlugin().ftpPass);
+        }
         session.setConfig("StrictHostKeyChecking", "no");
         session.connect();
+
         Channel channel = session.openChannel("sftp");
         channel.connect();
         ChannelSftp sftpChannel = (ChannelSftp) channel;

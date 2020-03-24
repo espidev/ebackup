@@ -28,12 +28,15 @@ max-backups: 20
 # Backups saved here will not be auto-deleted.
 ftp:
     enable: false
+    path: '~/backups/'
     type: sftp # ftp for ftp, sftp for ftp over ssh
     host: 'localhost'
     port: 22
     user: 'username'
     pass: 'password'
-    path: '~/backups/'
+    use-key-auth: false # use key based authentication for sftp (ignores password)
+    private-key: '~/.ssh/id_rsa'
+    private-key-password: '' # leave blank if the private key has no password
 
 # What you want in the backup.
 # By default, everything will be backupped, you can remove folders in the ignore section

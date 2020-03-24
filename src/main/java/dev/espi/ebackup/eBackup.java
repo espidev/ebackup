@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
-   Copyright 2019 EstiNet
+   Copyright 2020 EstiNet
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     File backupPath;
     int maxBackups;
 
-    String ftpType, ftpHost, ftpUser, ftpPass, ftpPath;
+    String ftpType, ftpHost, ftpUser, ftpPass, ftpPath, sftpPrivateKeyPath, sftpPrivateKeyPassword;
     int ftpPort;
-    boolean ftpEnable;
+    boolean ftpEnable, useSftpKeyAuth;
 
     boolean backupPluginJars, backupPluginConfs;
     List<String> filesToIgnore;
@@ -75,6 +75,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         ftpPort = getConfig().getInt("ftp.port");
         ftpUser = getConfig().getString("ftp.user");
         ftpPass = getConfig().getString("ftp.pass");
+        useSftpKeyAuth = getConfig().getBoolean("ftp.use-key-auth");
+        sftpPrivateKeyPath = getConfig().getString("ftp.private-key");
+        sftpPrivateKeyPassword = getConfig().getString("ftp.private-key-password");
         ftpPath = getConfig().getString("ftp.path");
         backupPluginJars = getConfig().getBoolean("backup.pluginjars");
         backupPluginConfs = getConfig().getBoolean("backup.pluginconfs");
