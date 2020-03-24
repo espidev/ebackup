@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,16 +48,17 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     List<String> filesToIgnore;
     List<File> ignoredFiles = new ArrayList<>();
 
-    @Override
-    public void onEnable() {
-        getLogger().info("Initializing eBackup...");
+    BukkitTask bukkitCronTask = null;
 
-        Metrics metrics = new Metrics(this);
+    // called on reload and when the plugin first loads
+    public void loadPlugin() {
+        ignoredFiles.clear();
 
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
 
-        if (!getDataFolder().exists()) getDataFolder().mkdir();
+        if (!getDataFolder().exists())
+            getDataFolder().mkdir();
 
         try {
             getConfig().load(getDataFolder() + "/config.yml");
@@ -85,17 +87,32 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         for (String s : filesToIgnore) {
             ignoredFiles.add(new File(s));
         }
-        this.getCommand("ebackup").setExecutor(this);
 
-        if (!backupPath.exists()) backupPath.mkdir(); // make sure backup location exists
+        // make sure backup location exists
+        if (!backupPath.exists())
+            backupPath.mkdir();
+
+        // stop cron task if it is running
+        if (bukkitCronTask != null)
+            bukkitCronTask.cancel();
 
         // start cron task
         Cron.checkCron();
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        bukkitCronTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             if (Cron.run()) {
                 BackupUtil.doBackup(true);
             }
         }, 20, 20);
+    }
+
+    @Override
+    public void onEnable() {
+        getLogger().info("Initializing eBackup...");
+
+        Metrics metrics = new Metrics(this);
+        this.getCommand("ebackup").setExecutor(this);
+
+        loadPlugin();
 
         getLogger().info("Plugin initialized!");
     }
@@ -119,19 +136,20 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup backuplocal - Starts a backup of the server, but does not upload to FTP/SFTP.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup list - Lists the backups in the folder.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup stats - Shows disk space.");
+                sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup reload - Reloads the plugin settings from the config.");
                 break;
             case "backup":
-                sender.sendMessage("Starting backup...");
+                sender.sendMessage(ChatColor.GRAY + "Starting backup...");
                 Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
                     BackupUtil.doBackup(true);
-                    sender.sendMessage("Finished!");
+                    sender.sendMessage(ChatColor.GRAY + "Finished!");
                 });
                 break;
             case "backuplocal":
-                sender.sendMessage("Starting backup...");
+                sender.sendMessage(ChatColor.GRAY + "Starting backup...");
                 Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
                     BackupUtil.doBackup(false);
-                    sender.sendMessage("Finished!");
+                    sender.sendMessage(ChatColor.GRAY + "Finished!");
                 });
                 break;
             case "list":
@@ -145,6 +163,11 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 sender.sendMessage(ChatColor.AQUA + "Total size: " + ChatColor.GRAY + (getPlugin().backupPath.getTotalSpace()/1024/1024/1024) + "GB");
                 sender.sendMessage(ChatColor.AQUA + "Space usable: " + ChatColor.GRAY + (getPlugin().backupPath.getUsableSpace()/1024/1024/1024) + "GB");
                 sender.sendMessage(ChatColor.AQUA + "Space free: " + ChatColor.GRAY + (getPlugin().backupPath.getFreeSpace()/1024/1024/1024) + "GB");
+                break;
+            case "reload":
+                sender.sendMessage(ChatColor.GRAY + "Starting plugin reload...");
+                loadPlugin();
+                sender.sendMessage(ChatColor.GRAY + "Reloaded eBackup!");
                 break;
             default:
                 sender.sendMessage(ChatColor.AQUA + "Do /ebackup help for help!");
