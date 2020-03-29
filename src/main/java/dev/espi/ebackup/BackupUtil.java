@@ -220,7 +220,6 @@ public class BackupUtil {
             for (File childFile : children) {
                 zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
             }
-            return;
         } else { // if it's a file, store
             FileInputStream fis = new FileInputStream(fileToZip);
             ZipEntry zipEntry = new ZipEntry(fileName);
