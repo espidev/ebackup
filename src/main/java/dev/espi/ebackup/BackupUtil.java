@@ -62,6 +62,9 @@ public class BackupUtil {
     public static void doBackup(boolean uploadToServer) {
         List<File> tempIgnore = new ArrayList<>();
         eBackup.getPlugin().getLogger().info("Starting backup...");
+
+        File currentWorkingDirectory = new File(Paths.get(".").toAbsolutePath().normalize().toString());
+
         try {
             // find plugin data to ignore
             for (File f : new File("plugins").listFiles()) {
@@ -81,7 +84,7 @@ public class BackupUtil {
 
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
-                File world = new File(w.getName());
+                File world = w.getWorldFolder();
 
                 // check if world is in ignored list
                 boolean skip = false;
@@ -103,7 +106,7 @@ public class BackupUtil {
 
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
                 eBackup.getPlugin().getLogger().info("Backing up world " + world.getName() + "...");
-                zipFile(world, world.getName(), zipOut);
+                zipFile(world, Paths.get(currentWorkingDirectory.toURI()).relativize(Paths.get(world.toURI())).toString(), zipOut);
                 w.setAutoSave(true);
 
                 // ignore in dfs
@@ -113,7 +116,7 @@ public class BackupUtil {
 
             // dfs all other files
             eBackup.getPlugin().getLogger().info("Backing up other files...");
-            zipFile(new File(Paths.get(".").toAbsolutePath().normalize().toString()), "", zipOut);
+            zipFile(currentWorkingDirectory, "", zipOut);
             zipOut.close();
             fos.close();
 
@@ -194,15 +197,19 @@ public class BackupUtil {
     private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
         if (fileToZip.isHidden() && !fileToZip.getPath().equals(".")) return;
         for (File f : eBackup.getPlugin().ignoredFiles) { // return if it is ignored file
-            if (f.getAbsolutePath().equals(fileToZip.getAbsolutePath())) return;
+            if (f.getCanonicalPath().equals(fileToZip.getCanonicalPath())) return;
         }
 
         // fix windows archivers not being able to see files because they don't support / (root) for zip files
         if (fileName.startsWith("/")) {
             fileName = fileName.substring(1);
         }
+        // make sure there won't be a "." folder
+        if (fileName.startsWith("./")) {
+            fileName = fileName.substring(2);
+        }
 
-        if (fileToZip.isDirectory()) { // recursively search
+        if (fileToZip.isDirectory()) { // if it's a directory, recursively search
             if (fileName.endsWith("/")) {
                 zipOut.putNextEntry(new ZipEntry(fileName));
             } else {
@@ -214,15 +221,16 @@ public class BackupUtil {
                 zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
             }
             return;
+        } else { // if it's a file, store
+            FileInputStream fis = new FileInputStream(fileToZip);
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
         }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
-        }
-        fis.close();
     }
 }
