@@ -39,6 +39,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     String crontask, backupFormat;
     File backupPath;
     int maxBackups;
+    boolean deleteAfterUpload;
 
     String ftpType, ftpHost, ftpUser, ftpPass, ftpPath, sftpPrivateKeyPath, sftpPrivateKeyPassword;
     int ftpPort;
@@ -71,6 +72,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         backupFormat = getConfig().getString("backup-format");
         backupPath = new File(getConfig().getString("backup-path"));
         maxBackups = getConfig().getInt("max-backups");
+        deleteAfterUpload = getConfig().getBoolean("delete-after-upload");
         ftpEnable = getConfig().getBoolean("ftp.enable");
         ftpType = getConfig().getString("ftp.type");
         ftpHost = getConfig().getString("ftp.host");

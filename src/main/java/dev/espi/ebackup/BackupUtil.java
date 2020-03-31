@@ -6,10 +6,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -122,12 +119,22 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
+                File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
                 if (eBackup.getPlugin().ftpType.equals("sftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
-                    uploadSFTP(new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip"));
-                } else if (uploadToServer && eBackup.getPlugin().ftpType.equals("ftp")) {
+                    uploadSFTP(f);
+                } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
-                    uploadFTP(new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip"));
+                    uploadFTP(f);
+                }
+
+                // if the upload is able to go smoothly, delete local backup
+                if (eBackup.getPlugin().deleteAfterUpload) {
+                    if (f.delete()) {
+                        eBackup.getPlugin().getLogger().info("Successfully deleted local backup zip after upload.");
+                    } else {
+                        eBackup.getPlugin().getLogger().warning("Unable to delete local backup zip after upload.");
+                    }
                 }
             }
 
@@ -173,7 +180,7 @@ public class BackupUtil {
         session.disconnect();
     }
 
-    private static void uploadFTP(File f) {
+    private static void uploadFTP(File f) throws IOException {
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
@@ -182,8 +189,6 @@ public class BackupUtil {
             ftpClient.setUseEPSVwithIPv4(true);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.storeFile(f.getName(), fio);
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             try {
                 ftpClient.disconnect();

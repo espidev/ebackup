@@ -14,6 +14,9 @@ crontask: '0 0 4 * * *' # This would make it every day at 4 AM
 # crontask: '0 0 * * * *' This would make it every hour
 # crontask: '0 0 4 * * 7' This would make it every sunday at 4 AM
 # crontask: '0 0 4 1 * *' This would make it every first of the month at 4 AM
+# crontask: '0 30 3 */2 * *' This would make it at 3:30 AM every 2 days
+
+# If you do /ebackup reload, you can see a description in the console of what the cron task does.
 
 backup-format: 'eBackup {DATE}'
 
@@ -23,6 +26,9 @@ backup-path: 'plugins/eBackup/backups'
 # The maximum backups stored. Will delete older backups when reached. (≤ 0 to disable)
 # Note: this will only work with local backups (fallbacks included).
 max-backups: 20
+
+# Delete the local backup after each upload.
+delete-after-upload: false
 
 # FTP/SFTP settings and configuration.
 # Backups saved here will not be auto-deleted.
