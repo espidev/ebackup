@@ -1,7 +1,6 @@
 package dev.espi.ebackup;
 
 import com.cronutils.descriptor.CronDescriptor;
-import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
