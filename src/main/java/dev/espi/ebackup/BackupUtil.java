@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /*
-   Copyright 2020 EstiNet
+   Copyright 2020 EspiDev
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -206,12 +206,16 @@ public class BackupUtil {
         }
 
         // fix windows archivers not being able to see files because they don't support / (root) for zip files
-        if (fileName.startsWith("/")) {
+        if (fileName.startsWith("/") || fileName.startsWith("\\")) {
             fileName = fileName.substring(1);
         }
         // make sure there won't be a "." folder
-        if (fileName.startsWith("./")) {
+        if (fileName.startsWith("./") || fileName.startsWith(".\\")) {
             fileName = fileName.substring(2);
+        }
+        // truncate \. on windows (from the end of folder names)
+        if (fileName.endsWith("/.") || fileName.endsWith("\\.")) {
+            fileName = fileName.substring(0, fileName.length()-2);
         }
 
         if (fileToZip.isDirectory()) { // if it's a directory, recursively search
