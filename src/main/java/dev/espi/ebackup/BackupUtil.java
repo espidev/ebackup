@@ -81,12 +81,18 @@ public class BackupUtil {
 
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
-                File world = w.getWorldFolder();
+                File worldFolder = w.getWorldFolder();
+
+                String worldPath = Paths.get(currentWorkingDirectory.toURI()).relativize(Paths.get(worldFolder.toURI())).toString();
+                if (worldPath.endsWith("/.")) {// 1.16 world folders end with /. for some reason
+                    worldPath = worldPath.substring(0, worldPath.length() - 2);
+                    worldFolder = new File(worldPath);
+                }
 
                 // check if world is in ignored list
                 boolean skip = false;
                 for (File f : eBackup.getPlugin().ignoredFiles) {
-                    if (f.getAbsolutePath().equals(world.getAbsolutePath())) {
+                    if (f.getAbsolutePath().equals(worldFolder.getAbsolutePath())) {
                         skip = true;
                         break;
                     }
@@ -102,13 +108,15 @@ public class BackupUtil {
                 while (!saved.get()) Thread.sleep(500);
 
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
-                eBackup.getPlugin().getLogger().info("Backing up world " + world.getName() + "...");
-                zipFile(world, Paths.get(currentWorkingDirectory.toURI()).relativize(Paths.get(world.toURI())).toString(), zipOut);
+
+                eBackup.getPlugin().getLogger().info("Backing up world " + w.getName() + " " + worldPath + "...");
+                zipFile(worldFolder, worldPath, zipOut);
+
                 w.setAutoSave(true);
 
                 // ignore in dfs
-                tempIgnore.add(world);
-                eBackup.getPlugin().ignoredFiles.add(world);
+                tempIgnore.add(worldFolder);
+                eBackup.getPlugin().ignoredFiles.add(worldFolder);
             }
 
             // dfs all other files
@@ -200,7 +208,9 @@ public class BackupUtil {
 
     // recursively compress files and directories
     private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
-        if (fileToZip.isHidden() && !fileToZip.getPath().equals(".")) return;
+        // don't ignore hidden folders
+        // if (fileToZip.isHidden() && !fileToZip.getPath().equals(".")) return;
+
         for (File f : eBackup.getPlugin().ignoredFiles) { // return if it is ignored file
             if (f.getCanonicalPath().equals(fileToZip.getCanonicalPath())) return;
         }
