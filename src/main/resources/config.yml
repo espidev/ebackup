@@ -45,11 +45,11 @@ ftp:
     private-key-password: '' # leave blank if the private key has no password
 
 # What you want in the backup.
-# By default, everything will be backupped, you can remove folders in the ignore section
+# By default, everything will be backupped, you can remove files/directories in the ignore section
 backup:
     pluginjars: true # The .jar files for the plugins
     pluginconfs: true # The data folder of each plugin
-    ignore: # Files to ignore and NOT backup
+    ignore: # Files/directories to ignore and NOT backup
         - 'plugins/eBackup/backups'
         - 'plugins/dynmap'
         - 'logs'
