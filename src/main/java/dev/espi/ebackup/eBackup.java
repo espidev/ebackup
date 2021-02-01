@@ -111,7 +111,11 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         getLogger().info("Initializing eBackup...");
 
-        Metrics metrics = new Metrics(this);
+        try {
+            Metrics metrics = new Metrics(this);
+        } catch (NoClassDefFoundError ignored) {
+            // ignore if metrics is broken for old versions
+        }
         this.getCommand("ebackup").setExecutor(this);
 
         loadPlugin();
