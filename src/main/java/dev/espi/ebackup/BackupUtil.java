@@ -55,10 +55,16 @@ public class BackupUtil {
     }
 
     // actually do the backup
-    // run async plz
+    // run async please
     public static void doBackup(boolean uploadToServer) {
         List<File> tempIgnore = new ArrayList<>();
         eBackup.getPlugin().getLogger().info("Starting backup...");
+
+        // do not backup when plugin is disabled
+        if (!eBackup.getPlugin().isEnabled()) {
+            eBackup.getPlugin().getLogger().warning("Unable to start a backup, because the plugin is disabled by the server!");
+            return;
+        }
 
         File currentWorkingDirectory = new File(Paths.get(".").toAbsolutePath().normalize().toString());
 
@@ -99,12 +105,14 @@ public class BackupUtil {
                 }
                 if (skip) continue;
 
+                // manually trigger world save (needs to be run sync)
                 AtomicBoolean saved = new AtomicBoolean(false);
                 Bukkit.getScheduler().runTask(eBackup.getPlugin(), () -> {
                     w.save();
                     saved.set(true);
                 });
 
+                // wait until world save is finished
                 while (!saved.get()) Thread.sleep(500);
 
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
