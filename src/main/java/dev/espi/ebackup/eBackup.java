@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
    Copyright 2020 EspiDev
@@ -33,6 +34,9 @@ import java.util.List;
  */
 
 public class eBackup extends JavaPlugin implements CommandExecutor {
+
+    // lock
+    AtomicBoolean isInBackup = new AtomicBoolean(false);
 
     // config options
 
@@ -102,7 +106,11 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         CronUtil.checkCron();
         bukkitCronTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             if (CronUtil.run()) {
-                BackupUtil.doBackup(true);
+                if (isInBackup.get()) {
+                    Bukkit.getLogger().warning("A backup was scheduled to happen now, but a backup was detected to be in progress. Skipping...");
+                } else {
+                    BackupUtil.doBackup(true);
+                }
             }
         }, 20, 20);
     }
@@ -145,18 +153,26 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup reload - Reloads the plugin settings from the config.");
                 break;
             case "backup":
-                sender.sendMessage(ChatColor.GRAY + "Starting backup...");
-                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-                    BackupUtil.doBackup(true);
-                    sender.sendMessage(ChatColor.GRAY + "Finished!");
-                });
+                if (isInBackup.get()) {
+                    sender.sendMessage(ChatColor.RED + "A backup is currently in progress!");
+                } else {
+                    sender.sendMessage(ChatColor.GRAY + "Starting backup...");
+                    Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                        BackupUtil.doBackup(true);
+                        sender.sendMessage(ChatColor.GRAY + "Finished!");
+                    });
+                }
                 break;
             case "backuplocal":
-                sender.sendMessage(ChatColor.GRAY + "Starting backup...");
-                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-                    BackupUtil.doBackup(false);
-                    sender.sendMessage(ChatColor.GRAY + "Finished!");
-                });
+                if (isInBackup.get()) {
+                    sender.sendMessage(ChatColor.RED + "A backup is currently in progress!");
+                } else {
+                    sender.sendMessage(ChatColor.GRAY + "Starting backup...");
+                    Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                        BackupUtil.doBackup(false);
+                        sender.sendMessage(ChatColor.GRAY + "Finished!");
+                    });
+                }
                 break;
             case "list":
                 sender.sendMessage(ChatColor.AQUA + "Local Backups:");

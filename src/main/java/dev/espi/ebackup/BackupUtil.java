@@ -66,6 +66,9 @@ public class BackupUtil {
             return;
         }
 
+        // prevent other processes from backing up at the same time
+        eBackup.getPlugin().isInBackup.set(true);
+
         File currentWorkingDirectory = new File(Paths.get(".").toAbsolutePath().normalize().toString());
 
         try {
@@ -164,6 +167,9 @@ public class BackupUtil {
             for (File f : tempIgnore) {
                 eBackup.getPlugin().ignoredFiles.remove(f);
             }
+
+            // unlock
+            eBackup.getPlugin().isInBackup.set(false);
         }
         eBackup.getPlugin().getLogger().info("Backup complete!");
     }
