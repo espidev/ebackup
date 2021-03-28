@@ -44,6 +44,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     File backupPath;
     int maxBackups;
     boolean deleteAfterUpload;
+    int compressionLevel;
 
     String ftpType, ftpHost, ftpUser, ftpPass, ftpPath, sftpPrivateKeyPath, sftpPrivateKeyPassword;
     int ftpPort;
@@ -77,6 +78,14 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         backupPath = new File(getConfig().getString("backup-path"));
         maxBackups = getConfig().getInt("max-backups");
         deleteAfterUpload = getConfig().getBoolean("delete-after-upload");
+        compressionLevel = getConfig().getInt("compression-level");
+        if (!getConfig().contains("compression-level") || compressionLevel > 9 || compressionLevel < 0) {
+            if (compressionLevel > 9 || compressionLevel < 0) {
+                getLogger().warning("Invalid compression level set! Must be between 0-9. Defaulting to 4.");
+            }
+            compressionLevel = 4;
+        }
+
         ftpEnable = getConfig().getBoolean("ftp.enable");
         ftpType = getConfig().getString("ftp.type");
         ftpHost = getConfig().getString("ftp.host");

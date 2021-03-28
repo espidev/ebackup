@@ -30,6 +30,10 @@ max-backups: 20
 # Delete the local backup after each upload.
 delete-after-upload: false
 
+# Zip compression level (0-9)
+# Increase it to reduce file size, but backups will be more CPU intensive and take longer
+compression-level: 4
+
 # FTP/SFTP settings and configuration.
 # Backups saved here will not be auto-deleted.
 ftp:

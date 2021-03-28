@@ -88,6 +88,9 @@ public class BackupUtil {
             FileOutputStream fos = new FileOutputStream(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
             ZipOutputStream zipOut = new ZipOutputStream(fos);
 
+            // set zip compression level
+            zipOut.setLevel(eBackup.getPlugin().compressionLevel);
+
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
                 File worldFolder = w.getWorldFolder();
