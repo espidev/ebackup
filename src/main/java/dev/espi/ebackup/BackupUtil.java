@@ -104,7 +104,7 @@ public class BackupUtil {
                 // check if world is in ignored list
                 boolean skip = false;
                 for (File f : eBackup.getPlugin().ignoredFiles) {
-                    if (f.getAbsolutePath().equals(worldFolder.getAbsolutePath())) {
+                    if (f.getCanonicalPath().equals(worldFolder.getCanonicalPath())) {
                         skip = true;
                         break;
                     }
