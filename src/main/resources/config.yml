@@ -18,6 +18,7 @@ crontask: '0 0 4 * * *' # This would make it every day at 4 AM
 
 # If you do /ebackup reload, you can see a description in the console of what the cron task does.
 
+# Filename format for the backup files created
 backup-format: 'eBackup {DATE}'
 
 # The folder where to store the backups locally.
