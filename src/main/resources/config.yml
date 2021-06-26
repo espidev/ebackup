@@ -21,6 +21,10 @@ crontask: '0 0 4 * * *' # This would make it every day at 4 AM
 # Filename format for the backup files created
 backup-format: 'eBackup {DATE}'
 
+# Format to use as replacement for {DATE} in backup-format
+# Refer to java.text.SimpleDateFormat for format docs
+backup-date-format: 'yyyy-MM-dd HH-mm-ss'
+
 # The folder where to store the backups locally.
 backup-path: 'plugins/eBackup/backups'
 

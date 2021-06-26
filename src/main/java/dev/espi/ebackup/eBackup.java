@@ -40,7 +40,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
 
     // config options
 
-    String crontask, backupFormat;
+    String crontask, backupFormat, backupDateFormat;
     File backupPath;
     int maxBackups;
     boolean deleteAfterUpload;
@@ -75,6 +75,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         // load config data
         crontask = getConfig().getString("crontask");
         backupFormat = getConfig().getString("backup-format");
+        backupDateFormat = getConfig().getString("backup-date-format");
         backupPath = new File(getConfig().getString("backup-path"));
         maxBackups = getConfig().getInt("max-backups");
         deleteAfterUpload = getConfig().getBoolean("delete-after-upload");

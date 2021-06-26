@@ -84,7 +84,8 @@ public class BackupUtil {
             checkMaxBackups();
 
             // zip
-            String fileName = eBackup.getPlugin().backupFormat.replace("{DATE}", new SimpleDateFormat("yyyy-MM-dd HH-mm-ss").format(new Date()));
+            SimpleDateFormat formatter = new SimpleDateFormat(eBackup.getPlugin().backupDateFormat);
+            String fileName = eBackup.getPlugin().backupFormat.replace("{DATE}", formatter.format(new Date()));
             FileOutputStream fos = new FileOutputStream(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
             ZipOutputStream zipOut = new ZipOutputStream(fos);
 
