@@ -213,6 +213,7 @@ public class BackupUtil {
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setUseEPSVwithIPv4(true);
+            ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.storeFile(f.getName(), fio);
         } finally {
