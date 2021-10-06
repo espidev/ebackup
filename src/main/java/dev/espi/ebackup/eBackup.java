@@ -56,6 +56,10 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
 
     BukkitTask bukkitCronTask = null;
 
+    public static eBackup getPlugin() {
+        return (eBackup) Bukkit.getPluginManager().getPlugin("eBackup");
+    }
+
     // called on reload and when the plugin first loads
     public void loadPlugin() {
         ignoredFiles.clear();
@@ -192,9 +196,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 break;
             case "stats":
                 sender.sendMessage(ChatColor.GRAY + "" + ChatColor.STRIKETHROUGH + "=====" + ChatColor.RESET + ChatColor.DARK_AQUA + " Disk Stats " + ChatColor.RESET + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "=====");
-                sender.sendMessage(ChatColor.AQUA + "Total size: " + ChatColor.GRAY + (getPlugin().backupPath.getTotalSpace()/1024/1024/1024) + "GB");
-                sender.sendMessage(ChatColor.AQUA + "Space usable: " + ChatColor.GRAY + (getPlugin().backupPath.getUsableSpace()/1024/1024/1024) + "GB");
-                sender.sendMessage(ChatColor.AQUA + "Space free: " + ChatColor.GRAY + (getPlugin().backupPath.getFreeSpace()/1024/1024/1024) + "GB");
+                sender.sendMessage(ChatColor.AQUA + "Total size: " + ChatColor.GRAY + (getPlugin().backupPath.getTotalSpace() / 1024 / 1024 / 1024) + "GB");
+                sender.sendMessage(ChatColor.AQUA + "Space usable: " + ChatColor.GRAY + (getPlugin().backupPath.getUsableSpace() / 1024 / 1024 / 1024) + "GB");
+                sender.sendMessage(ChatColor.AQUA + "Space free: " + ChatColor.GRAY + (getPlugin().backupPath.getFreeSpace() / 1024 / 1024 / 1024) + "GB");
                 break;
             case "reload":
                 sender.sendMessage(ChatColor.GRAY + "Starting plugin reload...");
@@ -206,10 +210,6 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 break;
         }
         return true;
-    }
-
-    public static eBackup getPlugin() {
-        return (eBackup) Bukkit.getPluginManager().getPlugin("eBackup");
     }
 
 }

@@ -42,24 +42,24 @@ compression-level: 4
 # FTP/SFTP settings and configuration.
 # Backups saved here will not be auto-deleted.
 ftp:
-    enable: false
-    path: '~/backups/'
-    type: sftp # ftp for ftp, sftp for ftp over ssh
-    host: 'localhost'
-    port: 22
-    user: 'username'
-    pass: 'password'
-    use-key-auth: false # use key based authentication for sftp (ignores password)
-    private-key: '~/.ssh/id_rsa'
-    private-key-password: '' # leave blank if the private key has no password
+  enable: false
+  path: '~/backups/'
+  type: sftp # ftp for ftp, sftp for ftp over ssh
+  host: 'localhost'
+  port: 22
+  user: 'username'
+  pass: 'password'
+  use-key-auth: false # use key based authentication for sftp (ignores password)
+  private-key: '~/.ssh/id_rsa'
+  private-key-password: '' # leave blank if the private key has no password
 
 # What you want in the backup.
 # By default, everything will be backupped, you can remove files/directories in the ignore section
 backup:
-    pluginjars: true # The .jar files for the plugins
-    pluginconfs: true # The data folder of each plugin
-    ignore: # Files/directories to ignore and NOT backup
-        - 'plugins/eBackup/backups'
-        - 'plugins/dynmap'
-        - 'logs'
-        - 'cache'
+  pluginjars: true # The .jar files for the plugins
+  pluginconfs: true # The data folder of each plugin
+  ignore: # Files/directories to ignore and NOT backup
+    - 'plugins/eBackup/backups'
+    - 'plugins/dynmap'
+    - 'logs'
+    - 'cache'
