@@ -6,7 +6,10 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -146,9 +149,11 @@ public class BackupUtil {
                 if (eBackup.getPlugin().ftpType.equals("sftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
                     uploadSFTP(f);
+                    eBackup.getPlugin().getLogger().info("Done.");
                 } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
                     uploadFTP(f);
+                    eBackup.getPlugin().getLogger().info("Done.");
                 }
 
                 // if the upload is able to go smoothly, delete local backup
@@ -243,7 +248,7 @@ public class BackupUtil {
         }
         // truncate \. on windows (from the end of folder names)
         if (fileName.endsWith("/.") || fileName.endsWith("\\.")) {
-            fileName = fileName.substring(0, fileName.length()-2);
+            fileName = fileName.substring(0, fileName.length() - 2);
         }
 
         if (fileToZip.isDirectory()) { // if it's a directory, recursively search

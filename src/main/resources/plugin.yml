@@ -7,7 +7,7 @@ main: dev.espi.ebackup.eBackup
 api-version: 1.13
 
 commands:
-    ebackup:
-        description: Plugin base command.
-        aliases: eb
-        permission: ebackup.admin
+  ebackup:
+    description: Plugin base command.
+    aliases: eb
+    permission: ebackup.admin

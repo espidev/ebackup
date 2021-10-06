@@ -37,11 +37,11 @@ public class CronUtil {
                 .withMinutes().and()
                 .withHours().and()
                 .withDayOfMonth()
-                    .supportsHash().supportsL().supportsW().and()
+                .supportsHash().supportsL().supportsW().and()
                 .withMonth().and()
                 .withDayOfWeek()
-                    .withIntMapping(7, 0) // non-standard non-zero numbers
-                    .supportsHash().supportsL().supportsW().and()
+                .withIntMapping(7, 0) // non-standard non-zero numbers
+                .supportsHash().supportsL().supportsW().and()
                 .instance();
 
         CronParser parser = new CronParser(cronDefinition);
