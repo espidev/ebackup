@@ -149,11 +149,9 @@ public class BackupUtil {
                 if (eBackup.getPlugin().ftpType.equals("sftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
                     uploadSFTP(f);
-                    eBackup.getPlugin().getLogger().info("Done.");
                 } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
                     eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
                     uploadFTP(f);
-                    eBackup.getPlugin().getLogger().info("Done.");
                 }
 
                 // if the upload is able to go smoothly, delete local backup
@@ -219,7 +217,11 @@ public class BackupUtil {
             ftpClient.enterLocalPassiveMode();
             ftpClient.setUseEPSVwithIPv4(true);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.storeFile(f.getName(), fio);
+            Boolean flag = ftpClient.storeFile(f.getName(), fio);
+            if (flag)
+                eBackup.getPlugin().getLogger().info("Upload Success.");
+            else
+                eBackup.getPlugin().getLogger().warning("Upload Failed.");
         } finally {
             try {
                 ftpClient.disconnect();
