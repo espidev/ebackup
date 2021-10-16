@@ -216,6 +216,10 @@ public class BackupUtil {
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
             ftpClient.enterLocalPassiveMode();
             ftpClient.setUseEPSVwithIPv4(true);
+            ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
+            ftpClient.setDataTimeout(60 * 1000);
+            ftpClient.setConnectTimeout(60 * 1000);
+            ftpClient.setDefaultTimeout(60 * 1000);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             Boolean flag = ftpClient.storeFile(f.getName(), fio);
             if (flag)
