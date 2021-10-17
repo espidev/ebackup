@@ -1,8 +1,7 @@
 package dev.espi.ebackup;
 
-import com.jcraft.jsch.*;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
@@ -147,23 +146,25 @@ public class BackupUtil {
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
                 File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
                 if (eBackup.getPlugin().ftpType.equals("sftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
-                    uploadSFTP(f);
+                    eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
+                    Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                        try {
+                            UploadUtill.uploadSFTP(f);
+                        } catch (JSchException | SftpException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
-                    uploadFTP(f);
-                }
-
-                // if the upload is able to go smoothly, delete local backup
-                if (eBackup.getPlugin().deleteAfterUpload) {
-                    if (f.delete()) {
-                        eBackup.getPlugin().getLogger().info("Successfully deleted local backup zip after upload.");
-                    } else {
-                        eBackup.getPlugin().getLogger().warning("Unable to delete local backup zip after upload.");
-                    }
+                    eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
+                    Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                        try {
+                            UploadUtill.uploadFTP(f);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -179,60 +180,6 @@ public class BackupUtil {
             eBackup.getPlugin().isInBackup.set(false);
         }
         eBackup.getPlugin().getLogger().info("Backup complete!");
-    }
-
-    private static void uploadSFTP(File f) throws JSchException, SftpException {
-        JSch jsch = new JSch();
-
-        // ssh key auth if enabled
-        if (eBackup.getPlugin().useSftpKeyAuth) {
-            if (eBackup.getPlugin().sftpPrivateKeyPassword.equals("")) {
-                jsch.addIdentity(eBackup.getPlugin().sftpPrivateKeyPath);
-            } else {
-                jsch.addIdentity(eBackup.getPlugin().sftpPrivateKeyPath, eBackup.getPlugin().sftpPrivateKeyPassword);
-            }
-        }
-
-        Session session = jsch.getSession(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
-        // password auth if using password
-        if (!eBackup.getPlugin().useSftpKeyAuth) {
-            session.setPassword(eBackup.getPlugin().ftpPass);
-        }
-        session.setConfig("StrictHostKeyChecking", "no");
-        session.connect();
-
-        Channel channel = session.openChannel("sftp");
-        channel.connect();
-        ChannelSftp sftpChannel = (ChannelSftp) channel;
-        sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath + "/" + f.getName());
-        sftpChannel.exit();
-        session.disconnect();
-    }
-
-    private static void uploadFTP(File f) throws IOException {
-        FTPClient ftpClient = new FTPClient();
-        try (FileInputStream fio = new FileInputStream(f)) {
-            ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
-            ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
-            ftpClient.enterLocalPassiveMode();
-            ftpClient.setUseEPSVwithIPv4(true);
-            ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
-            ftpClient.setDataTimeout(60 * 1000);
-            ftpClient.setConnectTimeout(60 * 1000);
-            ftpClient.setDefaultTimeout(60 * 1000);
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            Boolean flag = ftpClient.storeFile(f.getName(), fio);
-            if (flag)
-                eBackup.getPlugin().getLogger().info("Upload Success.");
-            else
-                eBackup.getPlugin().getLogger().warning("Upload Failed.");
-        } finally {
-            try {
-                ftpClient.disconnect();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     // recursively compress files and directories
