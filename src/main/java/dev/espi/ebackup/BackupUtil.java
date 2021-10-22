@@ -145,7 +145,6 @@ public class BackupUtil {
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
                 if (!eBackup.getPlugin().isInUpload.get()) {
-                    eBackup.getPlugin().isInUpload.set(true);
                     File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
                     if (eBackup.getPlugin().ftpType.equals("sftp")) {
                         eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
@@ -166,7 +165,6 @@ public class BackupUtil {
                             }
                         });
                     }
-                    eBackup.getPlugin().isInUpload.set(false);
                 } else {
                     Bukkit.getLogger().warning("A upload was scheduled to happen now, but a upload was detected to be in progress. Skipping...");
                 }

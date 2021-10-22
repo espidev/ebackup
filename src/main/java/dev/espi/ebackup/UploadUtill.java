@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class UploadUtill {
     public static void uploadSFTP(File f) throws JSchException, SftpException {
+        eBackup.getPlugin().isInUpload.set(true);
         JSch jsch = new JSch();
 
         // ssh key auth if enabled
@@ -36,9 +37,11 @@ public class UploadUtill {
         sftpChannel.exit();
         session.disconnect();
         deleteAfterUpload(f);
+        eBackup.getPlugin().isInUpload.set(false);
     }
 
     public static void uploadFTP(File f) throws IOException {
+        eBackup.getPlugin().isInUpload.set(true);
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.setDataTimeout(300 * 1000);
@@ -68,6 +71,7 @@ public class UploadUtill {
             }
         }
         deleteAfterUpload(f);
+        eBackup.getPlugin().isInUpload.set(false);
     }
 
     public static void deleteAfterUpload(File f) {
