@@ -144,25 +144,31 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
-                File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
-                if (eBackup.getPlugin().ftpType.equals("sftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
-                    Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
-                        try {
-                            UploadUtill.uploadSFTP(f);
-                        } catch (JSchException | SftpException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
-                    Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
-                        try {
-                            UploadUtill.uploadFTP(f);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                if (!eBackup.getPlugin().isInUpload.get()) {
+                    eBackup.getPlugin().isInUpload.set(true);
+                    File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
+                    if (eBackup.getPlugin().ftpType.equals("sftp")) {
+                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
+                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                            try {
+                                UploadUtill.uploadSFTP(f);
+                            } catch (JSchException | SftpException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
+                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
+                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                            try {
+                                UploadUtill.uploadFTP(f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                    eBackup.getPlugin().isInUpload.set(false);
+                } else {
+                    Bukkit.getLogger().warning("A upload was scheduled to happen now, but a upload was detected to be in progress. Skipping...");
                 }
             }
         } catch (Exception e) {

@@ -41,18 +41,18 @@ public class UploadUtill {
     public static void uploadFTP(File f) throws IOException {
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
-            ftpClient.setDataTimeout(60 * 1000);
-            ftpClient.setConnectTimeout(60 * 1000);
-            ftpClient.setDefaultTimeout(60 * 1000);
+            ftpClient.setDataTimeout(300 * 1000);
+            ftpClient.setConnectTimeout(300 * 1000);
+            ftpClient.setDefaultTimeout(300 * 1000);
 
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
             ftpClient.enterLocalPassiveMode();
-            ftpClient.setSoTimeout(60 * 1000);
+            ftpClient.setSoTimeout(300 * 1000);
 
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
-            ftpClient.setControlKeepAliveTimeout(3000);
-            ftpClient.setControlKeepAliveReplyTimeout(3000);
-            ftpClient.setUseEPSVwithIPv4(true);
+            ftpClient.setControlKeepAliveTimeout(8000);
+            ftpClient.setControlKeepAliveReplyTimeout(8000);
+            //ftpClient.setUseEPSVwithIPv4(true);
 
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -74,9 +74,9 @@ public class UploadUtill {
         // if the upload is able to go smoothly, delete local backup
         if (eBackup.getPlugin().deleteAfterUpload) {
             if (f.delete()) {
-                eBackup.getPlugin().getLogger().info("Successfully deleted local backup zip after upload.");
+                eBackup.getPlugin().getLogger().info("Successfully deleted " + f.getName() + " after upload.");
             } else {
-                eBackup.getPlugin().getLogger().warning("Unable to delete local backup zip after upload.");
+                eBackup.getPlugin().getLogger().warning("Unable to delete " + f.getName() + " after upload.");
             }
         }
     }
