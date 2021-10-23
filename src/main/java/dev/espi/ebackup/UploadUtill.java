@@ -47,18 +47,17 @@ public class UploadUtill {
             ftpClient.setDataTimeout(300 * 1000);
             ftpClient.setConnectTimeout(300 * 1000);
             ftpClient.setDefaultTimeout(300 * 1000);
+            ftpClient.setControlKeepAliveTimeout(60);
 
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
             ftpClient.enterLocalPassiveMode();
-            ftpClient.setSoTimeout(300 * 1000);
 
             ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
-            ftpClient.setControlKeepAliveTimeout(8000);
-            ftpClient.setControlKeepAliveReplyTimeout(8000);
             //ftpClient.setUseEPSVwithIPv4(true);
 
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            ftpClient.setBufferSize(1024 * 1024 * 4);
             if (ftpClient.storeFile(f.getName(), fio))
                 eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
             else
