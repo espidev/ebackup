@@ -3,6 +3,7 @@ package dev.espi.ebackup;
 import com.jcraft.jsch.*;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,9 +59,10 @@ public class UploadUtill {
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setBufferSize(1024 * 1024 * 4);
-            if (ftpClient.storeFile(f.getName(), fio))
+            if (ftpClient.storeFile(f.getName(), fio)) {
                 eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
-            else
+                deleteAfterUpload(f);
+            } else
                 eBackup.getPlugin().getLogger().warning("Upload " + f.getName() + " Failed.");
         } finally {
             try {
@@ -69,18 +71,18 @@ public class UploadUtill {
                 e.printStackTrace();
             }
         }
-        deleteAfterUpload(f);
         eBackup.getPlugin().isInUpload.set(false);
     }
 
     public static void deleteAfterUpload(File f) {
-        // if the upload is able to go smoothly, delete local backup
         if (eBackup.getPlugin().deleteAfterUpload) {
-            if (f.delete()) {
-                eBackup.getPlugin().getLogger().info("Successfully deleted " + f.getName() + " after upload.");
-            } else {
-                eBackup.getPlugin().getLogger().warning("Unable to delete " + f.getName() + " after upload.");
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                if (f.delete()) {
+                    eBackup.getPlugin().getLogger().info("Successfully deleted " + f.getName() + " after upload.");
+                } else {
+                    eBackup.getPlugin().getLogger().warning("Unable to delete " + f.getName() + " after upload.");
+                }
+            });
         }
     }
 }
