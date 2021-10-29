@@ -58,7 +58,7 @@ public class UploadUtill {
 
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.setBufferSize(1024 * 1024 * 4);
+            ftpClient.setBufferSize(1024 * 1024 * 8);
             if (ftpClient.storeFile(f.getName(), fio)) {
                 eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
                 deleteAfterUpload(f);
