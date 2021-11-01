@@ -47,6 +47,7 @@ public class UploadUtill {
             ftpClient.setDataTimeout(300 * 1000); //set time out to avoid blocking
             ftpClient.setConnectTimeout(300 * 1000);
             ftpClient.setDefaultTimeout(300 * 1000);
+            ftpClient.setControlKeepAliveTimeout(60);
 
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
             ftpClient.enterLocalPassiveMode();
@@ -56,10 +57,11 @@ public class UploadUtill {
 
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.setBufferSize(1024*1024*8); //change buffer size to increase upload speed
-            if (ftpClient.storeFile(f.getName(), fio))
+            ftpClient.setBufferSize(1024 * 1024 * 8); //change buffer size to increase upload speed
+            if (ftpClient.storeFile(f.getName(), fio)) {
                 eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
-            else
+                deleteAfterUpload(f);
+            } else
                 eBackup.getPlugin().getLogger().warning("Upload " + f.getName() + " Failed.");
         } finally {
             try {
@@ -68,7 +70,6 @@ public class UploadUtill {
                 e.printStackTrace();
             }
         }
-        deleteAfterUpload(f);
         eBackup.getPlugin().isInUpload.set(false);
     }
 
