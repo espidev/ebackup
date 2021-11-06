@@ -37,6 +37,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
 
     // lock
     AtomicBoolean isInBackup = new AtomicBoolean(false);
+    AtomicBoolean isInUpload = new AtomicBoolean(false);
 
     // config options
 
