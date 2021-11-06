@@ -142,23 +142,26 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
-                File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
-                if (eBackup.getPlugin().ftpType.equals("sftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading backup to SFTP server...");
-                    uploadSFTP(f);
-                } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
-                    eBackup.getPlugin().getLogger().info("Uploading backup to FTP server...");
-                    uploadFTP(f);
-                }
-
-                // if the upload is able to go smoothly, delete local backup
-                if (eBackup.getPlugin().deleteAfterUpload) {
-                    if (f.delete()) {
-                        eBackup.getPlugin().getLogger().info("Successfully deleted local backup zip after upload.");
-                    } else {
-                        eBackup.getPlugin().getLogger().warning("Unable to delete local backup zip after upload.");
+                    File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
+                    if (eBackup.getPlugin().ftpType.equals("sftp")) {
+                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
+                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                            try {
+                                uploadSFTP(f);
+                            } catch (JSchException | SftpException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
+                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
+                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                            try {
+                                uploadFTP(f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
                     }
-                }
             }
 
         } catch (Exception e) {
@@ -204,23 +207,49 @@ public class BackupUtil {
         sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath + "/" + f.getName());
         sftpChannel.exit();
         session.disconnect();
+        deleteAfterUpload(f);
     }
 
     private static void uploadFTP(File f) throws IOException {
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
+            ftpClient.setDataTimeout(180 * 1000);
+            ftpClient.setConnectTimeout(180 * 1000);
+            ftpClient.setDefaultTimeout(180 * 1000);
+            ftpClient.setControlKeepAliveTimeout(60);
+
             ftpClient.connect(eBackup.getPlugin().ftpHost, eBackup.getPlugin().ftpPort);
-            ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
             ftpClient.enterLocalPassiveMode();
+
+            ftpClient.login(eBackup.getPlugin().ftpUser, eBackup.getPlugin().ftpPass);
             ftpClient.setUseEPSVwithIPv4(true);
+
+            ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.storeFile(f.getName(), fio);
+            ftpClient.setBufferSize(1024 * 1024 * 16);
+            if (ftpClient.storeFile(f.getName(), fio)) {
+                eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
+                deleteAfterUpload(f);
+            } else
+                eBackup.getPlugin().getLogger().warning("Upload " + f.getName() + " Failed.");
         } finally {
             try {
                 ftpClient.disconnect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static void deleteAfterUpload(File f) {
+        if (eBackup.getPlugin().deleteAfterUpload) {
+            Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+                if (f.delete()) {
+                    eBackup.getPlugin().getLogger().info("Successfully deleted " + f.getName() + " after upload.");
+                } else {
+                    eBackup.getPlugin().getLogger().warning("Unable to delete " + f.getName() + " after upload.");
+                }
+            });
         }
     }
 
