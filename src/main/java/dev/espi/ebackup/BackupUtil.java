@@ -142,6 +142,7 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
+                if (!eBackup.getPlugin().isInUpload.get()) {
                     File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
                     if (eBackup.getPlugin().ftpType.equals("sftp")) {
                         eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
@@ -162,6 +163,9 @@ public class BackupUtil {
                             }
                         });
                     }
+                } else {
+                    Bukkit.getLogger().warning("A upload was scheduled to happen now, but a upload was detected to be in progress. Skipping...");
+                }
             }
 
         } catch (Exception e) {
@@ -182,6 +186,7 @@ public class BackupUtil {
     }
 
     private static void uploadSFTP(File f) throws JSchException, SftpException {
+        eBackup.getPlugin().isInUpload.set(true);
         JSch jsch = new JSch();
 
         // ssh key auth if enabled
@@ -208,9 +213,11 @@ public class BackupUtil {
         sftpChannel.exit();
         session.disconnect();
         deleteAfterUpload(f);
+        eBackup.getPlugin().isInUpload.set(false);
     }
 
     private static void uploadFTP(File f) throws IOException {
+        eBackup.getPlugin().isInUpload.set(true);
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.setDataTimeout(180 * 1000);
@@ -239,6 +246,7 @@ public class BackupUtil {
                 e.printStackTrace();
             }
         }
+        eBackup.getPlugin().isInUpload.set(false);
     }
 
     private static void deleteAfterUpload(File f) {
