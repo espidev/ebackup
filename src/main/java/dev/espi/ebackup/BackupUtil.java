@@ -148,18 +148,24 @@ public class BackupUtil {
                         eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
                         Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
                             try {
+                                eBackup.getPlugin().isInUpload.set(true);
                                 uploadSFTP(f);
                             } catch (JSchException | SftpException e) {
                                 e.printStackTrace();
+                            } finally {
+                                eBackup.getPlugin().isInUpload.set(false);
                             }
                         });
                     } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
                         eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
                         Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
                             try {
+                                eBackup.getPlugin().isInUpload.set(true);
                                 uploadFTP(f);
                             } catch (IOException e) {
                                 e.printStackTrace();
+                            } finally {
+                                eBackup.getPlugin().isInUpload.set(false);
                             }
                         });
                     }
@@ -186,7 +192,6 @@ public class BackupUtil {
     }
 
     private static void uploadSFTP(File f) throws JSchException, SftpException {
-        eBackup.getPlugin().isInUpload.set(true);
         JSch jsch = new JSch();
 
         // ssh key auth if enabled
@@ -213,11 +218,9 @@ public class BackupUtil {
         sftpChannel.exit();
         session.disconnect();
         deleteAfterUpload(f);
-        eBackup.getPlugin().isInUpload.set(false);
     }
 
     private static void uploadFTP(File f) throws IOException {
-        eBackup.getPlugin().isInUpload.set(true);
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.setDataTimeout(180 * 1000);
@@ -246,7 +249,6 @@ public class BackupUtil {
                 e.printStackTrace();
             }
         }
-        eBackup.getPlugin().isInUpload.set(false);
     }
 
     private static void deleteAfterUpload(File f) {
