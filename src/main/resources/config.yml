@@ -32,6 +32,9 @@ backup-path: 'plugins/eBackup/backups'
 # Note: this will only work with local backups (fallbacks included).
 max-backups: 20
 
+# This option reduces disk space by only performing backups if players had joined since the last backup or server start.
+only-backup-if-players-were-on: false
+
 # Delete the local backup after each upload.
 delete-after-upload: false
 
@@ -43,7 +46,7 @@ compression-level: 4
 # Backups saved here will not be auto-deleted.
 ftp:
     enable: false
-    path: '~/backups/'
+    path: '/home/user/backups/' # don't forget to change!
     type: sftp # ftp for ftp, sftp for ftp over ssh
     host: 'localhost'
     port: 22

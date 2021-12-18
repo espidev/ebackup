@@ -9,6 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +43,10 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     AtomicBoolean isInUpload = new AtomicBoolean(false);
 
     // config options
-
     String crontask, backupFormat, backupDateFormat;
     File backupPath;
     int maxBackups;
+    boolean onlyBackupIfPlayersWereOn;
     boolean deleteAfterUpload;
     int compressionLevel;
 
@@ -56,6 +59,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
     List<File> ignoredFiles = new ArrayList<>();
 
     BukkitTask bukkitCronTask = null;
+
+    // track if players were on
+    AtomicBoolean playersWereOnSinceLastBackup = new AtomicBoolean(false);
 
     // called on reload and when the plugin first loads
     public void loadPlugin() {
@@ -79,6 +85,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         backupDateFormat = getConfig().getString("backup-date-format");
         backupPath = new File(getConfig().getString("backup-path"));
         maxBackups = getConfig().getInt("max-backups");
+        onlyBackupIfPlayersWereOn = getConfig().getBoolean("only-backup-if-players-were-on");
         deleteAfterUpload = getConfig().getBoolean("delete-after-upload");
         compressionLevel = getConfig().getInt("compression-level");
         if (!getConfig().contains("compression-level") || compressionLevel > 9 || compressionLevel < 0) {
@@ -118,9 +125,15 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         bukkitCronTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             if (CronUtil.run()) {
                 if (isInBackup.get()) {
-                    Bukkit.getLogger().warning("A backup was scheduled to happen now, but a backup was detected to be in progress. Skipping...");
+                    getLogger().warning("A backup was scheduled to happen now, but a backup was detected to be in progress. Skipping...");
+                } else if (onlyBackupIfPlayersWereOn && !playersWereOnSinceLastBackup.get()) {
+                    getLogger().info("No players were detected to have joined since the last backup or server start, skipping backup...");
                 } else {
                     BackupUtil.doBackup(true);
+
+                    if (Bukkit.getServer().getOnlinePlayers().size() == 0) {
+                        playersWereOnSinceLastBackup.set(false);
+                    }
                 }
             }
         }, 20, 20);
@@ -147,6 +160,11 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         getLogger().info("Disabled eBackup!");
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        playersWereOnSinceLastBackup.set(true);
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
@@ -167,7 +185,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 if (isInBackup.get()) {
                     sender.sendMessage(ChatColor.RED + "A backup is currently in progress!");
                 } else {
-                    sender.sendMessage(ChatColor.GRAY + "Starting backup...");
+                    sender.sendMessage(ChatColor.GRAY + "Starting backup (check console logs for details)...");
                     Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
                         BackupUtil.doBackup(true);
                         sender.sendMessage(ChatColor.GRAY + "Finished!");
@@ -178,7 +196,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
                 if (isInBackup.get()) {
                     sender.sendMessage(ChatColor.RED + "A backup is currently in progress!");
                 } else {
-                    sender.sendMessage(ChatColor.GRAY + "Starting backup...");
+                    sender.sendMessage(ChatColor.GRAY + "Starting backup (check console logs for details)...");
                     Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
                         BackupUtil.doBackup(false);
                         sender.sendMessage(ChatColor.GRAY + "Finished!");
