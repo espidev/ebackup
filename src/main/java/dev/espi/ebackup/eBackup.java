@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.Listener;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
  */
 
-public class eBackup extends JavaPlugin implements CommandExecutor {
+public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
 
     // lock
     AtomicBoolean isInBackup = new AtomicBoolean(false);
@@ -78,6 +79,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor {
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
+
+        // register events
+        getServer().getPluginManager().registerEvents(this, this);
 
         // load config data
         crontask = getConfig().getString("crontask");

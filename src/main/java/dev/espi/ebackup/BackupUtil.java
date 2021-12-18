@@ -149,7 +149,7 @@ public class BackupUtil {
                     if (!isSFTP && !isFTP) {
                         eBackup.getPlugin().getLogger().warning("Invalid upload type specified (only ftp/sftp accepted). Skipping upload...");
                     } else {
-                        eBackup.getPlugin().getLogger().info(String.format("Starting upload %s to %s server...", fileName, isSFTP ? "SFTP" : "FTP"));
+                        eBackup.getPlugin().getLogger().info(String.format("Starting upload of %s to %s server...", fileName, isSFTP ? "SFTP" : "FTP"));
 
                         Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
                             try {
