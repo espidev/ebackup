@@ -142,35 +142,34 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
-                if (!eBackup.getPlugin().isInUpload.get()) {
-                    File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
-                    if (eBackup.getPlugin().ftpType.equals("sftp")) {
-                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to SFTP server...");
+                if (eBackup.getPlugin().isInUpload.get()) {
+                    Bukkit.getLogger().warning("A upload was scheduled to happen now, but an upload was detected to be in progress. Skipping...");
+                } else {
+                    boolean isSFTP = eBackup.getPlugin().ftpType.equals("sftp"), isFTP = eBackup.getPlugin().ftpType.equals("ftp");
+                    if (!isSFTP && !isFTP) {
+                        eBackup.getPlugin().getLogger().warning("Invalid upload type specified (only ftp/sftp accepted). Skipping upload...");
+                    } else {
+                        eBackup.getPlugin().getLogger().info(String.format("Starting upload %s to %s server...", fileName, isSFTP ? "SFTP" : "FTP"));
+
                         Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
                             try {
                                 eBackup.getPlugin().isInUpload.set(true);
-                                uploadSFTP(f);
-                            } catch (JSchException | SftpException e) {
+
+                                File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
+                                if (isSFTP) {
+                                    uploadSFTP(f);
+                                } else {
+                                    uploadFTP(f);
+                                }
+                                eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has succeeded!");
+                            } catch (Exception e) {
                                 e.printStackTrace();
-                            } finally {
-                                eBackup.getPlugin().isInUpload.set(false);
-                            }
-                        });
-                    } else if (eBackup.getPlugin().ftpType.equals("ftp")) {
-                        eBackup.getPlugin().getLogger().info("Uploading " + fileName + " to FTP server...");
-                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
-                            try {
-                                eBackup.getPlugin().isInUpload.set(true);
-                                uploadFTP(f);
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                                eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has failed.");
                             } finally {
                                 eBackup.getPlugin().isInUpload.set(false);
                             }
                         });
                     }
-                } else {
-                    Bukkit.getLogger().warning("A upload was scheduled to happen now, but a upload was detected to be in progress. Skipping...");
                 }
             }
 
@@ -188,7 +187,7 @@ public class BackupUtil {
             // unlock
             eBackup.getPlugin().isInBackup.set(false);
         }
-        eBackup.getPlugin().getLogger().info("Backup complete!");
+        eBackup.getPlugin().getLogger().info("Local backup complete!");
     }
 
     private static void uploadSFTP(File f) throws JSchException, SftpException {
@@ -214,7 +213,7 @@ public class BackupUtil {
         Channel channel = session.openChannel("sftp");
         channel.connect();
         ChannelSftp sftpChannel = (ChannelSftp) channel;
-        sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath + "/" + f.getName());
+        sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath);
         sftpChannel.exit();
         session.disconnect();
         deleteAfterUpload(f);
