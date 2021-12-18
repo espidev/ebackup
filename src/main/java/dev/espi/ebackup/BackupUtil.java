@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /*
    Copyright 2020 EspiDev
@@ -142,35 +144,7 @@ public class BackupUtil {
 
             // upload to ftp/sftp
             if (uploadToServer && eBackup.getPlugin().ftpEnable) {
-                if (eBackup.getPlugin().isInUpload.get()) {
-                    Bukkit.getLogger().warning("A upload was scheduled to happen now, but an upload was detected to be in progress. Skipping...");
-                } else {
-                    boolean isSFTP = eBackup.getPlugin().ftpType.equals("sftp"), isFTP = eBackup.getPlugin().ftpType.equals("ftp");
-                    if (!isSFTP && !isFTP) {
-                        eBackup.getPlugin().getLogger().warning("Invalid upload type specified (only ftp/sftp accepted). Skipping upload...");
-                    } else {
-                        eBackup.getPlugin().getLogger().info(String.format("Starting upload of %s to %s server...", fileName, isSFTP ? "SFTP" : "FTP"));
-
-                        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
-                            try {
-                                eBackup.getPlugin().isInUpload.set(true);
-
-                                File f = new File(eBackup.getPlugin().backupPath + "/" + fileName + ".zip");
-                                if (isSFTP) {
-                                    uploadSFTP(f);
-                                } else {
-                                    uploadFTP(f);
-                                }
-                                eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has succeeded!");
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has failed.");
-                            } finally {
-                                eBackup.getPlugin().isInUpload.set(false);
-                            }
-                        });
-                    }
-                }
+                uploadTask(eBackup.getPlugin().backupPath + "/" + fileName + ".zip", false);
             }
 
         } catch (Exception e) {
@@ -190,7 +164,58 @@ public class BackupUtil {
         eBackup.getPlugin().getLogger().info("Local backup complete!");
     }
 
-    private static void uploadSFTP(File f) throws JSchException, SftpException {
+    public static void testUpload() {
+        try {
+            File temp = new File(eBackup.getPlugin().getDataFolder() + "/uploadtest.txt");
+            temp.createNewFile();
+            uploadTask(temp.toString(), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            eBackup.getPlugin().getLogger().warning("Error creating temporary file.");
+        }
+    }
+
+    private static void uploadTask(String fileName, boolean testing) {
+        if (eBackup.getPlugin().isInUpload.get()) {
+            eBackup.getPlugin().getLogger().warning("A upload was scheduled to happen now, but an upload was detected to be in progress. Skipping...");
+            return;
+        }
+
+        boolean isSFTP = eBackup.getPlugin().ftpType.equals("sftp"), isFTP = eBackup.getPlugin().ftpType.equals("ftp");
+        if (!isSFTP && !isFTP) {
+            eBackup.getPlugin().getLogger().warning("Invalid upload type specified (only ftp/sftp accepted). Skipping upload...");
+            return;
+        }
+
+        eBackup.getPlugin().getLogger().info(String.format("Starting upload of %s to %s server...", fileName, isSFTP ? "SFTP" : "FTP"));
+        Bukkit.getScheduler().runTaskAsynchronously(eBackup.getPlugin(), () -> {
+            try {
+                eBackup.getPlugin().isInUpload.set(true);
+
+                File f = new File(fileName);
+                if (isSFTP) {
+                    uploadSFTP(f, testing);
+                } else {
+                    uploadFTP(f, testing);
+                }
+
+                // delete testing file
+                if (testing) {
+                    f.delete();
+                    eBackup.getPlugin().getLogger().info("Test upload successful!");
+                } else {
+                    eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has succeeded!");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                eBackup.getPlugin().getLogger().info("Upload of " + fileName + " has failed.");
+            } finally {
+                eBackup.getPlugin().isInUpload.set(false);
+            }
+        });
+    }
+
+    private static void uploadSFTP(File f, boolean testing) throws JSchException, SftpException {
         JSch jsch = new JSch();
 
         // ssh key auth if enabled
@@ -214,12 +239,21 @@ public class BackupUtil {
         channel.connect();
         ChannelSftp sftpChannel = (ChannelSftp) channel;
         sftpChannel.put(f.getAbsolutePath(), eBackup.getPlugin().ftpPath);
+
+        if (testing) {
+            // delete testing file
+            sftpChannel.rm(eBackup.getPlugin().ftpPath + "/" + f.getName());
+        }
+
         sftpChannel.exit();
         session.disconnect();
-        deleteAfterUpload(f);
+
+        if (!testing) {
+            deleteAfterUpload(f);
+        }
     }
 
-    private static void uploadFTP(File f) throws IOException {
+    private static void uploadFTP(File f, boolean testing) throws IOException {
         FTPClient ftpClient = new FTPClient();
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.setDataTimeout(180 * 1000);
@@ -237,10 +271,15 @@ public class BackupUtil {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setBufferSize(1024 * 1024 * 16);
             if (ftpClient.storeFile(f.getName(), fio)) {
-                eBackup.getPlugin().getLogger().info("Upload " + f.getName() + " Success.");
-                deleteAfterUpload(f);
-            } else
-                eBackup.getPlugin().getLogger().warning("Upload " + f.getName() + " Failed.");
+                if (testing) {
+                    // delete testing file
+                    ftpClient.deleteFile(f.getName());
+                } else {
+                    deleteAfterUpload(f);
+                }
+            } else {
+                eBackup.getPlugin().getLogger().warning("Upload of " + f.getName() + " has failed.");
+            }
         } finally {
             try {
                 ftpClient.disconnect();

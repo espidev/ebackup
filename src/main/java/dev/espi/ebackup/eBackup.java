@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.Listener;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -183,6 +184,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup backuplocal - Starts a backup of the server, but does not upload to FTP/SFTP.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup list - Lists the backups in the folder.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup stats - Shows disk space.");
+                sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup testupload - Test uploading a file to FTP/SFTP without creating a backup.");
                 sender.sendMessage(ChatColor.AQUA + "> " + ChatColor.GRAY + "/ebackup reload - Reloads the plugin settings from the config.");
                 break;
             case "backup":
@@ -218,6 +220,13 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
                 sender.sendMessage(ChatColor.AQUA + "Total size: " + ChatColor.GRAY + (getPlugin().backupPath.getTotalSpace()/1024/1024/1024) + "GB");
                 sender.sendMessage(ChatColor.AQUA + "Space usable: " + ChatColor.GRAY + (getPlugin().backupPath.getUsableSpace()/1024/1024/1024) + "GB");
                 sender.sendMessage(ChatColor.AQUA + "Space free: " + ChatColor.GRAY + (getPlugin().backupPath.getFreeSpace()/1024/1024/1024) + "GB");
+                break;
+            case "testupload":
+                sender.sendMessage(ChatColor.GRAY + "Starting upload test...");
+                if (sender instanceof Player) {
+                    sender.sendMessage(ChatColor.AQUA + "Please check the console for the upload status!");
+                }
+                BackupUtil.testUpload();
                 break;
             case "reload":
                 sender.sendMessage(ChatColor.GRAY + "Starting plugin reload...");

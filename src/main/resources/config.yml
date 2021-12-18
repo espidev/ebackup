@@ -33,7 +33,7 @@ backup-path: 'plugins/eBackup/backups'
 max-backups: 20
 
 # This option reduces disk space by only performing backups if players had joined since the last backup or server start.
-only-backup-if-players-were-on: false
+only-backup-if-players-were-on: true
 
 # Delete the local backup after each upload.
 delete-after-upload: false
