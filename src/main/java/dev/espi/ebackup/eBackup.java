@@ -163,6 +163,7 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
     @Override
     public void onDisable() {
         getLogger().info("Disabled eBackup!");
+        Bukkit.getScheduler().cancelTasks(this);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
