@@ -162,8 +162,12 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
 
     @Override
     public void onDisable() {
-        getLogger().info("Disabled eBackup!");
+        if (isInBackup.get() || isInUpload.get()) {
+            getLogger().info("Any running tasks (uploads or backups) will now be cancelled due to the server shutdown.");
+        }
         Bukkit.getScheduler().cancelTasks(this);
+
+        getLogger().info("Disabled eBackup!");
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
