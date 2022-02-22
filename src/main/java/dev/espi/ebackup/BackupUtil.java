@@ -270,6 +270,7 @@ public class BackupUtil {
             ftpClient.changeWorkingDirectory(eBackup.getPlugin().ftpPath);
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setBufferSize(1024 * 1024 * 16);
+
             if (ftpClient.storeFile(f.getName(), fio)) {
                 if (testing) {
                     // delete testing file
@@ -278,7 +279,8 @@ public class BackupUtil {
                     deleteAfterUpload(f);
                 }
             } else {
-                eBackup.getPlugin().getLogger().warning("Upload of " + f.getName() + " has failed.");
+                // ensure that an error message is printed if the file cannot be stored
+                throw new IOException();
             }
         } finally {
             try {
