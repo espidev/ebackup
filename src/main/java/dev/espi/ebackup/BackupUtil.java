@@ -255,6 +255,7 @@ public class BackupUtil {
 
     private static void uploadFTP(File f, boolean testing) throws IOException {
         FTPClient ftpClient = new FTPClient();
+        ftpClient.setAutodetectUTF8(true);
         try (FileInputStream fio = new FileInputStream(f)) {
             ftpClient.setDataTimeout(180 * 1000);
             ftpClient.setConnectTimeout(180 * 1000);
