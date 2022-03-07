@@ -94,6 +94,8 @@ public class BackupUtil {
             // set zip compression level
             zipOut.setLevel(eBackup.getPlugin().compressionLevel);
 
+            Set<String> visitedFiles = new HashSet<>();
+
             // backup worlds first
             for (World w : Bukkit.getWorlds()) {
                 File worldFolder = w.getWorldFolder();
@@ -127,7 +129,7 @@ public class BackupUtil {
                 w.setAutoSave(false); // make sure autosave doesn't screw everything over
 
                 eBackup.getPlugin().getLogger().info("Backing up world " + w.getName() + " " + worldPath + "...");
-                zipFile(worldFolder, worldPath, zipOut);
+                zipFile(worldFolder, worldPath, zipOut, visitedFiles);
 
                 w.setAutoSave(true);
 
@@ -138,7 +140,7 @@ public class BackupUtil {
 
             // dfs all other files
             eBackup.getPlugin().getLogger().info("Backing up other files...");
-            zipFile(currentWorkingDirectory, "", zipOut);
+            zipFile(currentWorkingDirectory, "", zipOut, visitedFiles);
             zipOut.close();
             fos.close();
 
@@ -305,11 +307,12 @@ public class BackupUtil {
     }
 
     // recursively compress files and directories
-    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
-        // don't ignore hidden folders
-        // if (fileToZip.isHidden() && !fileToZip.getPath().equals(".")) return;
+    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, Set<String> visitedFiles) throws IOException {
+        // ignore if this file has been visited before
+        if (visitedFiles.contains(fileToZip.getCanonicalPath())) return;
 
-        for (File f : eBackup.getPlugin().ignoredFiles) { // return if it is ignored file
+        // return if it is ignored file
+        for (File f : eBackup.getPlugin().ignoredFiles) {
             if (f.getCanonicalPath().equals(fileToZip.getCanonicalPath())) return;
         }
 
@@ -326,6 +329,8 @@ public class BackupUtil {
             fileName = fileName.substring(0, fileName.length()-2);
         }
 
+        visitedFiles.add(fileToZip.getCanonicalPath());
+
         if (fileToZip.isDirectory()) { // if it's a directory, recursively search
             if (fileName.endsWith("/")) {
                 zipOut.putNextEntry(new ZipEntry(fileName));
@@ -335,7 +340,7 @@ public class BackupUtil {
             zipOut.closeEntry();
             File[] children = fileToZip.listFiles();
             for (File childFile : children) {
-                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut, visitedFiles);
             }
         } else { // if it's a file, store
             try {

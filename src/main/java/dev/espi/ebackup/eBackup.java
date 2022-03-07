@@ -199,7 +199,9 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
                     sender.sendMessage(ChatColor.GRAY + "Starting backup (check console logs for details)...");
                     Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
                         BackupUtil.doBackup(true);
-                        sender.sendMessage(ChatColor.GRAY + "Finished!");
+                        if (sender instanceof Player) {
+                            sender.sendMessage(ChatColor.GRAY + "Finished local backup!");
+                        }
                     });
                 }
                 break;
