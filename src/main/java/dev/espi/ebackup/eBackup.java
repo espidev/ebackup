@@ -247,6 +247,22 @@ public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
         return true;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> commandTab = new ArrayList<>();
+        commandTab.add("help");
+        commandTab.add("backup");
+        commandTab.add("backuplocal");
+        commandTab.add("list");
+        commandTab.add("stats");
+        commandTab.add("testupload");
+        commandTab.add("reload");
+        if (args.length == 1) {
+            return commandTab;
+        }
+        return null;
+    }
+
     public static eBackup getPlugin() {
         return (eBackup) Bukkit.getPluginManager().getPlugin("eBackup");
     }
