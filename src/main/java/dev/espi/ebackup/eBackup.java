@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
  */
 
-public class eBackup extends JavaPlugin implements CommandExecutor, Listener {
+public class eBackup extends JavaPlugin implements CommandExecutor, Listener, TabExecutor {
 
     // lock
     AtomicBoolean isInBackup = new AtomicBoolean(false);
